@@ -1,6 +1,6 @@
 # 环境准备
 
-本Demo旨在探索使用Websocket实时传输音频流信息，供服务读取使用。使用[websocketd](https://github.com/joewalnes/websocketd/blob/master/README.md)服务器
+本Demo旨在探索使用Websocket实时传输音频流信息，供服务读取使用。使用[websocketd](https://github.com/joewalnes/websocketd/blob/master/README.md)服务器
 
 ## 安装websocketd
 
@@ -18,7 +18,7 @@ npm run dev
 
 双击打开demo.html(推荐使用chrome)
 
-> 参考文章
+### 参考文章
 
 [WebSocket 教程-阮一峰](http://www.ruanyifeng.com/blog/2017/05/websocket.html)
 
