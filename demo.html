@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<pre id="log"></pre>
+	<button onclick="beginRocord()">录入语音</button>
+	<script>
+	var ws;
+	function beginRocord() {
+		readyWs();
+		getUserMedia();
+	}
+
+	function readyWs() {
+	  ws = new WebSocket('ws://localhost:8080/');
+	  ws.onopen = function() {
+	    log('CONNECT');
+	  };
+	  ws.onclose = function() {
+	    log('DISCONNECT');
+	  };
+	  ws.onmessage = function(event) {
+	    log('MESSAGE: ' + event.data);
+	  };
+
+	  function log(msg) {
+	  	console.log(msg)
+	    document.getElementById('log').textContent += msg + '\n';
+	  }
+	}
+
+	function getUserMedia() {
+		if (navigator.getUserMedia) {
+		  navigator.getUserMedia({audio: true, video: false}, onSuccessSoHard, onFailSoHard);
+		} else if (navigator.webkitGetUserMedia) {
+			navigator.webkitGetUserMedia('audio', onSuccessSoHard, onFailSoHard);
+		}
+
+		function onSuccessSoHard(stream) {
+			  var audioContext = window.AudioContext || window.webkitAudioContext;;
+			  var context = new audioContext();
+			  var audioInput = context.createMediaStreamSource(stream);
+			  var bufferSize = 2048;
+			  // create a javascript node
+			  var recorder = context.createScriptProcessor(bufferSize, 1, 1);
+			  // specify the processing function
+			  recorder.onaudioprocess = recorderProcess;
+			  // connect stream to our recorder
+			  audioInput.connect(recorder);
+			  // connect our recorder to the previous destination
+			  recorder.connect(context.destination);
+		}
+
+		function onFailSoHard(e) {
+			console.log('Reeeejected!', e);	
+		}
+
+		function recorderProcess(e) {
+		  var left = e.inputBuffer.getChannelData(0);
+		  var msg = convertFloat32ToInt16(left);
+		  ws && ws.send(msg)
+		}
+
+		function convertFloat32ToInt16(buffer) {
+		  l = buffer.length;
+		  buf = new Int16Array(l);
+		  while (l--) {
+		    buf[l] = Math.min(1, buffer[l])*0x7FFF;
+		  }
+		  return buf.buffer;
+		}
+	}
+	</script>
+</body>
+</html>
